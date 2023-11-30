@@ -12,7 +12,7 @@ const CreateRecipe = () => {
     const [category, setCategory] = useState<Category | ''>('breakfast')
     const [ingredients, setIngredients] = useState<string>('')
     const [steps, setSteps] = useState<Step[]>([{title: '', description: ''}])
-    const [image,setImage] = useState<string>('')
+    const [image,setImage] = useState<File>()
     const [error,setError] = useState<string | null>(null)
     const [isLoading,setIsLoading] = useState<boolean>(false)
 
@@ -37,6 +37,13 @@ const CreateRecipe = () => {
         setSteps(temp)
     }
 
+    const handleImage = (e:React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.currentTarget.files
+        if(files){
+            setImage(files[0])
+        }
+    }
+
     const handleSubmit = async(e:React.FormEvent) => {
         e.preventDefault()
         if(isLoading || !user){
@@ -46,22 +53,22 @@ const CreateRecipe = () => {
         setIsLoading(true)
         const preparedIngredients = ingredients.split(',').map((item) => item.trim())
 
+        const formData = new FormData()
+        formData.append('title', title)
+        formData.append('description', description)
+        formData.append('image', image || '')
+        formData.append('ingredients', JSON.stringify(preparedIngredients))
+        formData.append('steps', JSON.stringify(steps))
+        formData.append('category', category)
+        formData.append('author_id', user._id)
+
         try{
             const response = await fetch(`${import.meta.env.VITE_SERVER_API}/recipes/`, {
                 method: 'POST',
                 headers: {
-                    "Content-Type": "application/json",
                     'Authorization': `Bearer ${user.token}`
                 },
-                body: JSON.stringify({
-                    title,
-                    description,
-                    category,
-                    ingredients: preparedIngredients,
-                    steps: steps,
-                    author_id: user._id,
-                    image: image
-                })
+                body: formData
             })
 
             const data = await response.json()
@@ -89,7 +96,11 @@ const CreateRecipe = () => {
             <input type="text" value={description} onChange={(e) => setDescription(e.currentTarget.value)}/>
 
             <label>Image Url</label>
-            <input type="text" value={image} onChange={(e) => setImage(e.currentTarget.value)}/>
+            <div className="img-box">
+                <input type="file" onChange={(e) => handleImage(e)} id="img-recipe"/>
+                <label htmlFor="img-recipe">File</label>
+                <span>{image && image.name}</span>
+            </div>
 
             <CategorySelector category={category} setCategory={setCategory} notNull/>
 

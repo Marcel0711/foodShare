@@ -155,6 +155,24 @@ form{
     }
   }
 
+  .img-box{
+    margin: 1rem 0;
+  }
+
+  input[type='file']{
+    display: none;
+    visibility: hidden;
+    opacity: 0;
+  
+    &+label{
+      display: inline-block;
+      cursor: pointer;
+      background-color: #f9f9f9;
+      border: 1px solid #2e4d4d;
+      padding: 0.25rem 0.5rem;
+    }
+  }
+
   textarea{
     resize: none;
     min-height: 50px;

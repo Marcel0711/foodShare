@@ -6,22 +6,21 @@ const useRegister = () => {
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const { dispatch } = useUserContext()
 
-    const register = async (username:string, password:string, avatar:string) => {
+    const register = async (username:string, password:string, avatar: File | undefined) => {
         setIsLoading(true)
         setError(null)
 
+        const formData = new FormData()
+        formData.append('username', username)
+        formData.append('password', password)
+        formData.append('avatar', avatar || '')
+
         const response = await fetch(`${import.meta.env.VITE_SERVER_API}/users/register`, {
             method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({
-                username,
-                password,
-                avatar: avatar || ""
-            })
+            body: formData
         })
 
         const data = await response.json()
-
         if(response.ok){
             localStorage.setItem('userFS', JSON.stringify(data))
             dispatch({type: "LOGIN", payload: data})
@@ -29,6 +28,7 @@ const useRegister = () => {
         if(!response.ok){
             setError(data.error)
         }
+
         setIsLoading(false)
     }
 

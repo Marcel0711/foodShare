@@ -5,31 +5,36 @@ import useRegister from "../hooks/useRegister";
 const Login = () => {
     const [username, setUsername] = useState<string>('')
     const [password, setPassword] = useState<string>('')
-    const [imageUrl, setImageUrl] = useState<string>('')
+    const [image, setImage] = useState<File>()
     const [isLogin,setIsLogin] = useState<boolean>(true)
 
     const { login, isLoading: loginLoading, error: loginError } = useLogin()
     const { register, isLoading: registerLoading, error: registerError } = useRegister()
 
-    document.title = 'Sign up'
-
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
-
 
         if(isLogin){
             if(!loginLoading){
                 login(username, password)
             }
         }else{
-            if(!registerLoading){
-                register(username, password, imageUrl)
+            if(!registerLoading){              
+                register(username, password, image)
             }
         }
     }
 
+    const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.currentTarget.files
+        if(file){
+            setImage(file[0])
+        }
+    }
+
+    document.title = 'Sign up'
     return ( 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} encType="multipart/form-data">
             <h1>{isLogin ? 'Log in' : 'Register'}</h1>
             <label>Username *</label>
             <input type="text" value={username} onChange={(e)=>setUsername(e.currentTarget.value)}/>
@@ -39,7 +44,11 @@ const Login = () => {
         
             {!isLogin && <>
                 <label>Image url</label>
-                <input type="text" value={imageUrl} onChange={(e)=>setImageUrl(e.currentTarget.value)}/>
+                <div className="img-box">
+                    <input type="file" id="image-register" onChange={(e)=>handleImage(e)}/>
+                    <label htmlFor="image-register">File</label>
+                    <span> {image && image.name}</span>
+                </div>
             </>}
 
             <button disabled={registerLoading || loginLoading} type="submit">{isLogin ? 'Login' : 'Register'}</button>
